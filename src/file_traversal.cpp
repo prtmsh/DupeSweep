@@ -52,7 +52,7 @@ bool FileTraversal::shouldProcessFile(const FilePath& path) {
     std::string filename = path.filename().string();
     
     //linux hidden files start with '.'
-    if(!filename.empty() && filename[0]=='0') {
+    if(!filename.empty() && filename[0]=='.') {
         return false;
     }
 

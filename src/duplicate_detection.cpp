@@ -12,7 +12,7 @@ DuplicateList DuplicateDetection::findDuplicates(
     const std::function<void(const std::string&, int, int)>& progressCallback
 ) {
     // step 1: collect all files
-    progressCallback("scanning dirextory... ", 0, 0);
+    progressCallback("scanning directory... ", 0, 0);
     FileList files = FileTraversal::collectFiles(
         directory,
         [&progressCallback](const FilePath& path) {
@@ -20,7 +20,7 @@ DuplicateList DuplicateDetection::findDuplicates(
         }
     );
 
-    progressCallback("found " + std::to_string(files.size()) + "files", 0, 0);
+    progressCallback("found " + std::to_string(files.size()) + " files", 0, 0);
     if(files.empty()) {
         return {};
     }
@@ -31,9 +31,9 @@ DuplicateList DuplicateDetection::findDuplicates(
     SizeGroup potentialDuplicates = Grouping::filterPotentialDuplicates(sizeGroups);
 
     // count files with potential duplicates
-    int potentialDuplicaeCount = 0;
+    int potentialDuplicatesCount = 0;
     for(const auto& [size, paths]: potentialDuplicates) {
-        potentialDuplicaeCount += paths.size();
+        potentialDuplicatesCount += paths.size();
     }
 
     progressCallback("found " + std::to_string(potentialDuplicaeCount) + " potential duplicates", 0, 0);

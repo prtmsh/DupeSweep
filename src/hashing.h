@@ -25,7 +25,7 @@ namespace dupesweep {
         static HashGroup findDuplicates(
             const SizeGroup& sizeGroups,
             int numThreads = 0,
-            const std::function<void(int, int)>& progressCallbacl = [](int, int) {}
+            const std::function<void(int, int)>& progressCallback = [](int, int) {}
         );
 
     private:

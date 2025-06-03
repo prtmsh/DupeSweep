@@ -118,7 +118,7 @@ HashGroup Hashing::processFilesParallel(
     std::mutex hashGroupsMutex;
 
     // determine the number of threads to use
-    int threadCount = numThreads > 0 : std::thread::hardware_concurrency();
+    int threadCount = numThreads > 0 ? numThreads : std::thread::hardware_concurrency();
 
     if(threadCount == 0) {
         threadCount = DEFAULT_THREAD_COUNT;
@@ -144,7 +144,7 @@ HashGroup Hashing::processFilesParallel(
                     localGroups[hash].push_back(files[j]);
 
                     //update progress
-                    int processed == ++processedFiles;
+                    int processed = ++processedFiles;
                     progressCallback(processed, totalFiles);
                 } catch(const std::exception& e) {
                     std::cerr << "Error hashing file " << files[j] << ": " << e.what() << "\n";
@@ -196,12 +196,12 @@ HashGroup Hashing::findDuplicates(
             if(quickHashPaths.size() <= 1) continue;
             
             // calculate full hashes in parallel
-            HashGroup fullHashGroups = processedFiles(
+            HashGroup fullHashGroups = processFilesParallel(
                 quickHashPaths,
                 fullHash,
                 numThreads,
                 processedFiles,
-                progressCallBack,
+                progressCallback,
                 totalFiles
             );
 
