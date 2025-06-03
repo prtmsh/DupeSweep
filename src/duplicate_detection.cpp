@@ -36,14 +36,14 @@ DuplicateList DuplicateDetection::findDuplicates(
         potentialDuplicatesCount += paths.size();
     }
 
-    progressCallback("found " + std::to_string(potentialDuplicaeCount) + " potential duplicates", 0, 0);
+    progressCallback("found " + std::to_string(potentialDuplicatesCount) + " potential duplicates", 0, 0);
 
-    if(potentialDuplicaeCount == 0){
+    if(potentialDuplicatesCount == 0){
         return {};
     }
 
     // step 3: find duplicates using quickHash + fullHash
-    progressCallback("calculating file hashes...", 0, potentialDuplicaeCount);
+    progressCallback("calculating file hashes...", 0, potentialDuplicatesCount);
     HashGroup duplicateHashGroups = Hashing::findDuplicates(
         potentialDuplicates,
         numThreads,

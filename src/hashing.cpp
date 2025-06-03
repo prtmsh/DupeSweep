@@ -6,6 +6,7 @@
 #include <sstream>
 #include <thread>
 #include <atomic>
+#include <iostream>
 
 #include <openssl/sha.h>
 
