@@ -13,6 +13,14 @@
 namespace dupesweep {
 
 std::string Hashing::quickHash(const FilePath& path) {
+    unsigned char buffer[QUICK_HASH_BYTES];
+
+    // open file and read the first QUICK_HASH_BYTES bytes
+    std::ifstream file(path, std::ios::binary);
+    if(!file) {
+        throw std::runtime_error("Cannot open file for quick hashing: " + path.string());
+    }
+
     file.read(reinterpret_cast<char*>(buffer), QUICK_HASH_BYTES);
     size_t bytesRead = file.gcount();
 
@@ -26,6 +34,8 @@ std::string Hashing::quickHash(const FilePath& path) {
 }
 
 std::string Hashing::fullHash(const FilePath& path) {
+    unsigned char buffer[HASH_BUFFER_SIZE];
+
     // open the file
     std::ifstream file(path, std::ios::binary);
     if(!file) {
