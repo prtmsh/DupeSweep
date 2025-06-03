@@ -8,72 +8,56 @@
 #include <atomic>
 #include <iostream>
 
-#include <openssl/sha.h>
+#include <xxhash.h>
 
 namespace dupesweep {
 
 std::string Hashing::quickHash(const FilePath& path) {
-    unsigned char buffer[QUICK_HASH_BYTES];
-
-    // open file and read the first QUICK_HASH_BYTES bytes
-    std::ifstream file(path, std::ios::binary);
-    if(!file) {
-        throw std::runtime_error("Cannot open file for quick hashing: " + path.string());
-    }
-
     file.read(reinterpret_cast<char*>(buffer), QUICK_HASH_BYTES);
     size_t bytesRead = file.gcount();
 
-    // calculate sha-256 hash
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, buffer, bytesRead);
-    SHA256_Final(hash, &sha256);
+    // calculate xxhash
+    XXH64_hash_t hash = XXH64(buffer, bytesRead, XXHASH_SEED);
 
     // convert hash to hex string
     std::stringstream ss;
-    for (int i=0; i<SHA256_DIGEST_LENGTH; i++){
-        ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
-    }
-
+    ss << std::hex << hash;
     return ss.str();
 }
 
 std::string Hashing::fullHash(const FilePath& path) {
-    unsigned char buffer[HASH_BUFFER_SIZE];
-
     // open the file
     std::ifstream file(path, std::ios::binary);
     if(!file) {
-        throw std::runtime_error("Cannot open file for full hashing: " + path.string());
+        throw std::runtime_error("cannot open file for full hashing: " + path.string());
     }
 
-    // initialize sha-256 context
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
+    // initialize xxhash state
+    XXH64_state_t* state = XXH64_createState();
+    if (state == nullptr) {
+        throw std::runtime_error("failed to create xxHash state");
+    }
+
+    XXH64_reset(state, XXHASH_SEED);
 
     // read and update hash in chunks
     while(file) {
         file.read(reinterpret_cast<char*>(buffer), HASH_BUFFER_SIZE);
         size_t bytesRead = file.gcount();
         if(bytesRead > 0) {
-            SHA256_Update(&sha256, buffer, bytesRead);
+            XXH64_update(state, buffer, bytesRead);
         }
         if(bytesRead < HASH_BUFFER_SIZE) {
             break;
         }
     }
 
-    SHA256_Final(hash, &sha256);
+    XXH64_hash_t hash = XXH64_digest(state);
+    XXH64_freeState(state);
 
     // convert hash to hex string
     std::stringstream ss;
-    for(int i=0; i<SHA256_DIGEST_LENGTH; i++) {
-        ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
-    }
-
+    ss << std::hex << hash;
     return ss.str();
 }
 
