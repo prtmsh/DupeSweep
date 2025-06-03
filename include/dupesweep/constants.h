@@ -15,4 +15,7 @@ namespace dupesweep {
     constexpr size_t HASH_BUFFER_SIZE = 4 * 1024 * 1024;
 
     constexpr int DEFAULT_THREAD_COUNT = 4;
+
+    // xxHash seed for consistent results
+    constexpr unsigned int XXHASH_SEED = 0;
 }

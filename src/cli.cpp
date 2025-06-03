@@ -116,7 +116,7 @@ void CLI::displayDuplicates(const DuplicateList& duplicates) {
         groupCount++;
         std::cout << "Duplicate group #" << groupCount
                   << " (Size: " << formatSize(group.fileSize)
-                  << ", Hash: " << group.hash.substr(0, 8) << "...)" << std::endl;
+                  << ", Hash: " << group.hash << ")" << std::endl;
 
         int fileCount = 0;
         for (const auto& file : group.files) {
