@@ -2,7 +2,9 @@
 #include "duplicate_detection.h"
 #include <iostream>
 #include <chrono>
-#include <ctime>
+#include <iomanip>
+#include <string>
+#include <sstream>
 
 using namespace dupesweep;
 
@@ -26,34 +28,69 @@ int main(int argc, char* argv[]) {
             if (options.verbose || current == 0) {
                 std::cout << message;
                 if (total > 0) {
-                    std::cout << " (" << current << "/" << total << ", "
-                              << (current * 100 / total) << "%)";
+                    std::cout << " (" << current << "/" << total;
+                    if (current > 0) {
+                         std::cout << ", " << (current * 100 / total) << "%";
+                    }
+                    std::cout << ")";
                 }
                 std::cout << std::endl;
-            } 
-            else if (total > 0 && current % (total / 100 + 1) == 0) {
-                // show progress bar
-                std::cout << "\\rProgress: " << (current * 100 / total) << "% completed..." << std::flush;
+            }
+            else if (!options.verbose && total > 0 && current > 0 ) {
+                static int last_percentage = -1;
+                int current_percentage = (current * 100 / total);
+                if (current_percentage > last_percentage || current == total) {
+                    std::cout << "\rProgress: " << current_percentage << "% completed (" << current << "/" << total << ")..." << std::flush;
+                    last_percentage = current_percentage;
+                }
+                if (current == total) {
+                    std::cout << std::endl;
+                }
+            }
+            else if (!options.verbose && total == 0) {
+                 std::cout << message << std::endl;
             }
         }
     );
 
-    // record end time and calculate duration
     auto endTime = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime).count();
+
+    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    double seconds_taken_val = duration_ms.count() / 1000.0;
+
+    std::ostringstream time_message_stream;
+    time_message_stream << "Time taken: " << std::fixed << std::setprecision(2) << seconds_taken_val << " seconds.";
+    std::string time_taken_message = time_message_stream.str();
+
+
+    if (!options.verbose && !duplicates.empty()) { 
+        std::cout << "\r" << std::string(100, ' ') << "\r" << std::flush;
+    }
 
     std::cout << std::endl;
-    std::cout << "Scan completed in " << duration << " seconds." << std::endl;
+    std::cout << "Scan completed." << std::endl;
     std::cout << std::endl;
 
     // display results
     CLI::displayDuplicates(duplicates);
     CLI::displaySummary(duplicates);
-
-    // handle duplicate deletion if needed
-    if (!options.dryRun || options.interactive) {
-        CLI::handleDuplicateDeletion(duplicates, options.dryRun, options.interactive);
+    
+    if (!duplicates.empty()) {
+        std::cout << std::endl;
     }
+
+    if (!options.dryRun) {
+        CLI::handleDuplicateDeletion(duplicates, options.dryRun /*which is false here*/, options.interactive);
+    } else {
+        if (!duplicates.empty()) {
+             std::cout << "Dry run mode - no files were deleted." << std::endl;
+        }
+    }
+    
+    std::cout << std::endl;
+
+
+    std::cout << time_taken_message << std::endl;
 
     return 0;
 }
