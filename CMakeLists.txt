@@ -6,8 +6,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Find OpenSSL package
+# Find required packages
 find_package(OpenSSL REQUIRED)
+find_package(Threads REQUIRED)
 
 # Add include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -18,8 +19,8 @@ file(GLOB SOURCES "src/*.cpp")
 # Add executable
 add_executable(dupesweep ${SOURCES})
 
-# Link with OpenSSL
-target_link_libraries(dupesweep OpenSSL::Crypto)
+# Link with OpenSSL and Threads
+target_link_libraries(dupesweep OpenSSL::Crypto Threads::Threads)
 
 # Link with filesystem library if needed (gcc < 9.0)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
